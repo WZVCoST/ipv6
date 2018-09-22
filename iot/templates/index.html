@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Test</title>
+    <meta charset="utf-8">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://static.jianshukeji.com/highcharts/images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* css 代码  */
+    </style>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://img.hcharts.cn/highcharts/highcharts.js"></script>
+    <script src="https://img.hcharts.cn/highcharts/modules/exporting.js"></script>
+    <script src="https://img.hcharts.cn/highcharts-plugins/highcharts-zh_CN.js"></script>
+</head>
+<body>
+<br>
+<span style="font-size: 18px;">数据数量:</span>
+<input style="width: 60px;" id="num"/>&ensp;<button id="limit" type="button" class="btn btn-primary">确定</button>
+</body>
+<script>
+    $('#limit').click(function () {
+        var num = document.getElementById("num").value;
+        window.location.href = '?limit=' + num;
+    });
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+
+    function activeLastPointToolip(chart) {
+        var points = chart.series[0].points;
+        chart.tooltip.refresh(points[points.length - 1]);
+    }
+
+    window.onload = function () {
+        var str = '';
+        url = "data?limit=" +{{ limit }};
+        $.getJSON(url, function (json) {
+            if (json.device_list != null) {
+                for (var i = 0; i < json.device_list.length; i++) {
+                    str += '<div id="' + json.device_list[i] + '" style="min-width:400px;height:400px"></div>'; //拼接str
+                }
+            }
+            $("body").append(str);
+            for (var i = 0; i < json.device_list.length; i++) {
+                var d_name = json.device_list[i];
+                Highcharts.chart(d_name, {
+                    chart: {
+                        type: 'spline',
+                        marginRight: 10,
+                        events: {
+                            load: function () {
+                                var series = this.series[0],
+                                    chart = this,
+                                    maxt = json[d_name].data[json[d_name].data.length - 1].x,
+                                    device_name = d_name;
+                                activeLastPointToolip(chart);
+                                setInterval(function () {
+                                    url = "ajax_data/?maxtimestamp=" + maxt + "&d_name=" + device_name;
+                                    $.getJSON(url, function (json) {
+                                        if (json != null) {
+                                            for (var i = 0, l = json.length; i < l; i++) {
+                                                var x = json[i].x,
+                                                    y = json[i].y;
+                                                maxt = x;
+                                                series.addPoint([x, y], true, true);
+                                                activeLastPointToolip(chart);
+                                            }
+                                        }
+                                    });
+
+                                }, 1000);
+                            }
+                        }
+                    },
+                    title: {
+                        text: '动态实时' + d_name + '数据'
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        tickPixelInterval: 150
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'value'
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.series.name + '</b><br/>' +
+                                Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                                Highcharts.numberFormat(this.y, 2);
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: json[d_name].type,
+                        data: json[d_name].data
+                    }]
+
+                });
+            }
+
+        });
+
+    }
+</script>
+
+</html>

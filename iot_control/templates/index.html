@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>反向控制</title>
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://static.jianshukeji.com/highcharts/images/favicon.ico">
+</head>
+<body>
+<div style="width: 800px; margin: 0 auto;">
+    <h1>设备控制</h1>
+	<div>在线设备列表:</div>
+    <form class="form-horizontal" role="form" action="/" method="post">
+        {% csrf_token %}
+        <select name="d_list" id="d_list" style="width:120px;" class ="form-control">
+        </select>
+        <input type="text" class="form-control" name="code" placeholder="请输入指令...">
+        <button class ="btn btn-info" type="submit">发送</button>
+    </form>
+</div>
+</body>
+</html>
+<script>
+window.onload = function () {
+	$.getJSON('device', function (json) {
+		$("d_list").empty();
+		var obj=document.getElementById('d_list');
+		device_list = json.device_list;
+		for(var i=0;i<device_list.length;i++){
+			obj.options.add(new Option(device_list[i],device_list[i]));
+		}
+	})
+}
+</script>
