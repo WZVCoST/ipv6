@@ -1,0 +1,67 @@
+
+<html>
+
+
+<head>
+<script type=”text/javascript” src=”jquery-1.8.3.min.js”></script>
+<script type=”text/javascript” src=”highcharts.js”></script>
+<script type=”text/javascript” src=”exporting.js”></script>
+<script>
+
+$(function () {
+$(‘#container’).highcharts({
+title: {
+text: ‘用户上传速率’,    //标题
+x: -20 //center
+},
+labels: {
+staggerLines: 1
+},
+subtitle: {
+text: ‘in_speed bytes per second’,   //副标题
+x: -20
+},
+xAxis: {
+categories: <?php echo $data1[0]['name']; ?>    定义X轴数据
+},
+yAxis: {
+title: {
+text: ‘in_speed (字节每秒)’   //Y轴单位
+},
+plotLines: [{
+value: 0,
+width: 1,
+color: ‘#808080′
+}]
+},
+tooltip: {
+valueSuffix: ‘bps’
+},
+legend: {
+layout: ‘vertical’,
+align: ‘right’,
+verticalAlign: ‘middle’,
+borderWidth: 0
+},
+series: <?php echo $data1[0]['sj']; ?>  //定义Y轴数据
+});
+});
+
+</script>
+
+</head>
+<body>
+
+<?php
+$json_string = file_get_contents('test.json');
+// 把JSON字符串转成PHP数组
+$data1 = json_decode($json_string, true);
+?>
+<?php
+
+var_dump($data1 );
+?>
+<div id=”container” style=”min-width: 310px; height: 400px; margin: 0 auto”></div>
+
+</body>
+</html>
